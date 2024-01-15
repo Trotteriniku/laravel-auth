@@ -8,6 +8,7 @@
         @endforeach
         </ul>
 
+    <a class="btn btn-success" href="{{route('admin.projects.create')}}">Aggiungi Progetto</a>
 
     </section>
 @endsection
