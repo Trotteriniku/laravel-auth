@@ -9,6 +9,7 @@ use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -42,7 +43,10 @@ class ProjectController extends Controller
         //add slug to formData
         $formData['slug'] = $slug;
         //prendiamo l'id dell'utente loggato
-
+        $userId = Auth::id();
+        //dd($userId);
+        //aggiungiamo l'id dell'utente
+        $formData['user_id'] = $userId;
 
         if ($request->hasFile('preview')) {
             $img_path = Storage::put('images', $request->preview);
@@ -88,6 +92,8 @@ class ProjectController extends Controller
             $formData['preview'] = $img_path;
         }
 
+        //aggiungiamo l'id dell'utente proprietario del post
+        $formData['user_id'] = $project->user_id;
 
         $project->update($formData);
         return redirect()->route('admin.projects.show', $project->id);
