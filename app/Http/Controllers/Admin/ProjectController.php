@@ -1,12 +1,14 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\Project;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -34,18 +36,21 @@ class ProjectController extends Controller
      */
     public function store(StoreProjectRequest $request)
     {
-            $formData = $request->validated();
-            //CREATE SLUG
-            $slug = Str::slug($formData['title'], '-');
-            //add slug to formData
-            $formData['slug'] = $slug;
-            //prendiamo l'id dell'utente loggato
+        $formData = $request->validated();
+        //CREATE SLUG
+        $slug = Str::slug($formData['title'], '-');
+        //add slug to formData
+        $formData['slug'] = $slug;
+        //prendiamo l'id dell'utente loggato
 
 
+        if ($request->hasFile('preview')) {
+            $img_path = Storage::put('images', $request->preview);
+            $formData['preview'] = $img_path;
+        }
 
-
-            $project = Project::create($formData);
-            return redirect()->route('admin.projects.show', $project->id);
+        $project = Project::create($formData);
+        return redirect()->route('admin.projects.show', $project->id);
 
     }
 
@@ -75,7 +80,13 @@ class ProjectController extends Controller
         $slug = Str::slug($formData['title'], '-');
         //add slug to formData
         $formData['slug'] = $slug;
-
+        if ($request->hasFile('preview')) {
+            if ($project->preview) {
+                Storage::delete($project->preview);
+            }
+            $img_path = Storage::put('images', $formData['preview']);
+            $formData['preview'] = $img_path;
+        }
 
 
         $project->update($formData);
